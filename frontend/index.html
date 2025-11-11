@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontend Docker avec MongoDB</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; margin:0; padding:20px; }
+    .container { max-width:800px; margin:0 auto; background:white; padding:30px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); text-align:center; }
+    button { background:#007bff; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-size:16px; margin:5px; }
+    button:hover { background:#0056b3; }
+    table { width:100%; border-collapse:collapse; margin-top:20px; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:center; }
+    th { background:#f2f2f2; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Docker Compose App</h1>
+    <h2>Gestion des Produits MongoDB</h2>
+
+    <button onclick="loadProducts()">Afficher les produits</button>
+    <button onclick="addProduct()">Ajouter un produit</button>
+
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prix</th>
+          <th>Catégorie</th>
+          <th>Quantité</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Produits injectés ici -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000/api/products';
+    const tableBody = document.querySelector('#productTable tbody');
+
+    async function loadProducts() {
+      try {
+        const res = await fetch(API);
+        const products = await res.json(); // ✅ tableau directement
+        tableBody.innerHTML = '';
+
+        products.forEach(p => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${p.name}</td>
+            <td>${p.price}</td>
+            <td>${p.category || ''}</td>
+            <td>${p.quantity}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } catch (err) {
+        alert('Erreur lors du chargement des produits : ' + err.message);
+      }
+    }
+
+    async function addProduct() {
+      const product = {
+        name: "Produit " + Math.floor(Math.random()*1000),
+        price: Math.floor(Math.random()*100),
+        category: "test",
+        quantity: 10
+      };
+
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(product)
+        });
+        const newProduct = await res.json();
+        alert("✅ Produit ajouté : " + newProduct.name);
+        loadProducts(); // rafraîchir tableau
+      } catch (err) {
+        alert('Erreur lors de l’ajout du produit : ' + err.message);
+      }
+    }
+
+    // Charger automatiquement au démarrage
+    loadProducts();
+  </script>
+</body>
+</html>
+

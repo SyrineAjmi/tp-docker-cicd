@@ -1,0 +1,43 @@
+version: "3.3"
+
+services:
+  mongo:
+    image: mongo:5.0
+    container_name: tp-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    networks:
+      - webnet
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./backend
+    container_name: tp-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/tpdb
+    depends_on:
+      - mongo
+    networks:
+      - webnet
+
+  frontend:
+    build: ./frontend
+    container_name: tp-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - webnet
+
+networks:
+  webnet:
+
+volumes:
+  mongo-data:
+    driver: local
+
