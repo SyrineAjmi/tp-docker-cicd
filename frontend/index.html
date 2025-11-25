@@ -3,81 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Frontend Docker avec PostgreSQL</title>
+  <title>Frontend - TP Docker</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Docker Compose App</h1>
-    <h2>Gestion des Produits PostgreSQL</h2>
-
-    <button onclick="loadProducts()">Afficher les produits</button>
-    <button onclick="addProduct()">Ajouter un produit</button>
-
-    <table id="productTable">
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Prix</th>
-          <th>Catégorie</th>
-          <th>Quantité</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <h1>TP Docker Avancé</h1>
+    <h2>Frontend Statique</h2>
+    <div id="api-response">Loading API data...</div>
+    <div id="db-response">Loading Database data...</div>
   </div>
 
-<script>
-const API = window.location.hostname === 'localhost'
-  ? 'http://localhost:3000/api/products'
-  : 'http://backend:3000/api/products';
+  <script>
+    async function fetchData() {
+      try {
+        // Fetch API status
+        const apiResponse = await fetch('http://localhost:3000/api');
+        if (!apiResponse.ok) throw new Error('API request failed');
+        const apiData = await apiResponse.json();
+        document.getElementById('api-response').innerText = JSON.stringify(apiData, null, 2);
 
-const tableBody = document.querySelector('#productTable tbody');
+        // Fetch database data
+        const dbResponse = await fetch('http://localhost:3000/db');
+        if (!dbResponse.ok) throw new Error('Database request failed');
+        const dbData = await dbResponse.json();
+        document.getElementById('db-response').innerText = JSON.stringify(dbData, null, 2);
+      } catch (error) {
+        document.getElementById('api-response').innerText = `Error: ${error.message}`;
+        document.getElementById('db-response').innerText = `Error: ${error.message}`;
+      }
+    }
 
-async function loadProducts() {
-  try {
-    const res = await fetch(API);
-    const products = await res.json();
-    tableBody.innerHTML = '';
-    products.forEach(p => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${p.name}</td>
-        <td>${p.price}</td>
-        <td>${p.category || ''}</td>
-        <td>${p.quantity}</td>
-      `;
-      tableBody.appendChild(row);
-    });
-  } catch (err) {
-    alert('Erreur lors du chargement des produits : ' + err.message);
-  }
-}
-
-async function addProduct() {
-  const product = {
-    name: "Produit " + Math.floor(Math.random()*1000),
-    price: Math.floor(Math.random()*100),
-    category: "test",
-    quantity: Math.floor(Math.random()*20)
-  };
-
-  try {
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(product)
-    });
-    const newProduct = await res.json();
-    alert("✅ Produit ajouté : " + newProduct.name);
-    loadProducts();
-  } catch (err) {
-    alert('Erreur lors de l’ajout du produit : ' + err.message);
-  }
-}
-
-loadProducts();
-</script>
+    // Appel initial après 1 seconde
+    setTimeout(fetchData, 1000);
+  </script>
 </body>
 </html>
 

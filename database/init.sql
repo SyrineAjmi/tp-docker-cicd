@@ -1,12 +1,12 @@
-CREATE TABLE products (
+-- Création de la table users
+CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
-  price NUMERIC NOT NULL,
-  category VARCHAR(100),
-  quantity INT DEFAULT 0
+  email VARCHAR(100) UNIQUE NOT NULL
 );
 
-INSERT INTO products (name, price, category, quantity) VALUES
-('Product A', 10, 'Category 1', 5),
-('Product B', 20, 'Category 2', 3);
+-- Insertion de quelques utilisateurs
+INSERT INTO users (name, email) VALUES
+  ('Alice', 'alice@example.com'),
+  ('Bob', 'bob@example.com');
 
